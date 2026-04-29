@@ -201,7 +201,7 @@ class TestControlsExecute(unittest.TestCase):
         ctrl = Controls({"b": btn})
         with patch("pi_focus_tracker.controls.subprocess.Popen") as mock_popen:
             ctrl._execute("echo hello")
-            mock_popen.assert_called_once_with("echo hello", shell=True)
+            mock_popen.assert_called_once_with(["echo", "hello"])
 
 
 class TestControlsRunLoop(unittest.TestCase):

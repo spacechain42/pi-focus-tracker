@@ -41,6 +41,7 @@ Usage example::
 
 """
 
+import shlex
 import subprocess
 import threading
 import time
@@ -238,11 +239,16 @@ class Controls:
 
     @staticmethod
     def _execute(action: _Action) -> None:
-        """Execute *action* (callable or shell command string)."""
+        """Execute *action* (callable or shell command string).
+
+        String actions are split with :func:`shlex.split` and executed via
+        :class:`subprocess.Popen` without ``shell=True`` to prevent shell
+        injection vulnerabilities.
+        """
         if callable(action):
             action()
         elif isinstance(action, str):
-            subprocess.Popen(action, shell=True)
+            subprocess.Popen(shlex.split(action))
 
     # ------------------------------------------------------------------
     # Context manager support
