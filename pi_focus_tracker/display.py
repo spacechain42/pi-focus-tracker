@@ -401,9 +401,9 @@ class LCDDisplay:
             existing zone.
         """
         with self._lock:
-            if row >= self.rows:
+            if row < 0 or row >= self.rows:
                 raise ValueError("row must be within the display bounds")
-            if col + width > self.cols:
+            if col < 0 or col + width > self.cols:
                 raise ValueError("zone must fit within the display width")
 
             zone_end = col + width

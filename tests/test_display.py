@@ -232,6 +232,18 @@ class TestLCDDisplay(unittest.TestCase):
         with self.assertRaises(ValueError):
             display.add_zone("bottom", row=2, col=0, width=4, text="Oops")
 
+    def test_add_zone_rejects_negative_col(self):
+        display, _ = self._make_display()
+
+        with self.assertRaises(ValueError):
+            display.add_zone("neg", row=0, col=-1, width=4, text="Oops")
+
+    def test_add_zone_rejects_negative_row(self):
+        display, _ = self._make_display()
+
+        with self.assertRaises(ValueError):
+            display.add_zone("neg", row=-1, col=0, width=4, text="Oops")
+
     # ------------------------------------------------------------------
     # update() writes to bus
     # ------------------------------------------------------------------
