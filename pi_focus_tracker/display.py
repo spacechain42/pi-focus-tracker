@@ -393,9 +393,28 @@ class LCDDisplay:
         -------
         TextZone
             The newly created zone.
+
+        Raises
+        ------
+        ValueError
+            If the zone falls outside the display bounds or overlaps an
+            existing zone.
         """
-        zone = TextZone(name, row, col, width, text, scrolling, scroll_speed)
         with self._lock:
+            if row >= self.rows:
+                raise ValueError("row must be within the display bounds")
+            if col + width > self.cols:
+                raise ValueError("zone must fit within the display width")
+
+            zone_end = col + width
+            for existing_zone in self._zones.values():
+                if existing_zone.row != row:
+                    continue
+                existing_end = existing_zone.col + existing_zone.width
+                if col < existing_end and existing_zone.col < zone_end:
+                    raise ValueError("zone must not overlap an existing zone")
+
+            zone = TextZone(name, row, col, width, text, scrolling, scroll_speed)
             self._zones[name] = zone
         return zone
 

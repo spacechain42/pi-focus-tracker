@@ -205,6 +205,33 @@ class TestLCDDisplay(unittest.TestCase):
         with self.assertRaises(KeyError):
             display.set_zone_text("nonexistent", "text")
 
+    def test_add_zone_rejects_overlap_on_same_row(self):
+        display, _ = self._make_display()
+        display.add_zone("left", row=0, col=0, width=8, text="Hello")
+
+        with self.assertRaises(ValueError):
+            display.add_zone("right", row=0, col=7, width=4, text="Oops")
+
+    def test_add_zone_allows_adjacent_zone(self):
+        display, _ = self._make_display()
+        display.add_zone("left", row=0, col=0, width=8, text="Hello")
+
+        zone = display.add_zone("right", row=0, col=8, width=4, text="OK")
+
+        self.assertEqual(zone.col, 8)
+
+    def test_add_zone_rejects_zone_past_display_edge(self):
+        display, _ = self._make_display(cols=16)
+
+        with self.assertRaises(ValueError):
+            display.add_zone("wide", row=0, col=12, width=5, text="Oops")
+
+    def test_add_zone_rejects_row_past_display_edge(self):
+        display, _ = self._make_display(rows=2)
+
+        with self.assertRaises(ValueError):
+            display.add_zone("bottom", row=2, col=0, width=4, text="Oops")
+
     # ------------------------------------------------------------------
     # update() writes to bus
     # ------------------------------------------------------------------
