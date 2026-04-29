@@ -90,22 +90,25 @@ class TestCountdownTimerConstruction(unittest.TestCase):
             CountdownTimer("t", -1, _make_mock_display(), _make_mock_button(), _make_mock_button())
 
     def test_creates_title_zone_short_title(self):
+        from pi_focus_tracker.timer import _TITLE_WIDTH
         timer, display, _, _ = _make_timer(title="Work", duration=60)
         display.add_zone.assert_any_call(
-            "timer_title", row=0, col=0, width=16, text="Work", scrolling=False
+            "timer_title", row=1, col=0, width=_TITLE_WIDTH, text="Work", scrolling=False
         )
 
     def test_creates_title_zone_long_title_enables_scrolling(self):
+        from pi_focus_tracker.timer import _TITLE_WIDTH
         long_title = "A Very Long Focus Session Title"
         timer, display, _, _ = _make_timer(title=long_title, duration=60)
         display.add_zone.assert_any_call(
-            "timer_title", row=0, col=0, width=16, text=long_title, scrolling=True
+            "timer_title", row=1, col=0, width=_TITLE_WIDTH, text=long_title, scrolling=True
         )
 
     def test_creates_time_zone_with_formatted_duration(self):
+        from pi_focus_tracker.timer import _TIME_WIDTH
         timer, display, _, _ = _make_timer(duration=90)
         display.add_zone.assert_any_call(
-            "timer_time", row=1, col=0, width=16, text="01:30"
+            "timer_time", row=0, col=0, width=_TIME_WIDTH, text="01:30"
         )
 
     def test_initial_state_is_running(self):

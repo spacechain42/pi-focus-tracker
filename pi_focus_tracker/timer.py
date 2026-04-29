@@ -15,9 +15,9 @@ State machine
 
 Display layout (2x16)
 ---------------------
-- Row 0 ``timer_title`` -- session title (scrolling when longer than 16 chars).
-- Row 1 ``timer_time``  -- remaining time as ``MM:SS``; ``MM:SS [P]`` when
+- Row 0 ``timer_time``  -- remaining time as ``MM:SS``; ``MM:SS [P]`` when
   paused; ``DONE`` when completed.
+- Row 1 ``timer_title`` -- session title (scrolling when longer than 6 chars).
 """
 
 import threading
@@ -30,7 +30,7 @@ from .display import LCDDisplay
 
 _TITLE_ZONE = "timer_title"
 _TIME_ZONE  = "timer_time"
-_TIME_WIDTH = 5   # "MM:SS"
+_TIME_WIDTH = 9   # "MM:SS"
 _TITLE_WIDTH = 6
 
 
