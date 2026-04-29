@@ -226,6 +226,14 @@ class TestLCDDisplay(unittest.TestCase):
         with self.assertRaises(ValueError):
             display.add_zone("wide", row=0, col=12, width=5, text="Oops")
 
+    def test_allows_full_width_zone(self):
+        display, _ = self._make_display(cols=16)
+
+        zone = display.add_zone("full", row=0, col=0, width=16, text="Full width")
+
+        self.assertEqual(zone.col, 0)
+        self.assertEqual(zone.width, 16)
+
     def test_add_zone_rejects_row_past_display_edge(self):
         display, _ = self._make_display(rows=2)
 
