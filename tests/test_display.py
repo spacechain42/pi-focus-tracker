@@ -165,6 +165,14 @@ class TestLCDDisplay(unittest.TestCase):
         display, _ = self._make_display()
         self.assertIsNotNone(display)
 
+    def test_default_update_frequency(self):
+        display, _ = self._make_display()
+        self.assertEqual(display.update_frequency, 0.5)
+
+    def test_invalid_update_frequency_raises(self):
+        with self.assertRaises(ValueError):
+            self._make_display(update_frequency=0)
+
     def test_init_calls_write_byte(self):
         display, bus = self._make_display()
         # During init the LCD is initialised; write_byte should have been called
@@ -340,6 +348,31 @@ class TestLCDDisplay(unittest.TestCase):
         self.assertTrue(display._running)
         display.stop()
         self.assertFalse(display._running)
+
+    def test_auto_update_skips_ticks_without_active_zones(self):
+        from pi_focus_tracker.display import LCDDisplay
+        bus = MagicMock()
+        display = LCDDisplay(auto_update=False, _bus=bus, update_frequency=0.01)
+        display.update = MagicMock(wraps=display.update)
+
+        display.start()
+        time.sleep(0.05)
+        display.stop()
+
+        self.assertEqual(display.update.call_count, 0)
+
+    def test_auto_update_ticks_when_scroll_zone_is_active(self):
+        from pi_focus_tracker.display import LCDDisplay
+        bus = MagicMock()
+        display = LCDDisplay(auto_update=False, _bus=bus, update_frequency=0.01)
+        display.update = MagicMock(wraps=display.update)
+        display.add_zone("scroll", row=0, col=0, width=4, text="ABCDE", scrolling=True, scroll_speed=0)
+
+        display.start()
+        time.sleep(0.06)
+        display.stop()
+
+        self.assertGreaterEqual(display.update.call_count, 2)
 
     def test_start_stop_idempotent(self):
         from pi_focus_tracker.display import LCDDisplay

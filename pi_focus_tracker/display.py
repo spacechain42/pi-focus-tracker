@@ -29,6 +29,7 @@ write operations become no-ops, which is useful for unit testing.
 
 import threading
 import time
+import warnings
 
 # ---------------------------------------------------------------------------
 # Optional hardware import
@@ -216,6 +217,9 @@ class LCDDisplay:
         Number of columns on the display.  Defaults to 16.
     rows : int, optional
         Number of rows on the display.  Defaults to 2.
+    update_frequency : float, optional
+        Seconds between background auto-update loop iterations.
+        Defaults to ``0.5``.
     auto_update : bool, optional
         When ``True`` a background thread continuously refreshes scrolling
         zones and rewrites changed zones to the LCD.  Defaults to ``True``.
@@ -234,12 +238,17 @@ class LCDDisplay:
         bus_number: int = 1,
         cols: int = 16,
         rows: int = 2,
+        update_frequency: float = 0.5,
         auto_update: bool = True,
         _bus=None,   # dependency-injection for testing
     ) -> None:
+        if update_frequency <= 0:
+            raise ValueError("update_frequency must be greater than 0")
+
         self.i2c_address = i2c_address
         self.cols = cols
         self.rows = rows
+        self.update_frequency = update_frequency
 
         self._zones: dict = {}
         self._backlight: bool = True
@@ -251,7 +260,14 @@ class LCDDisplay:
         if _bus is not None:
             self._bus = _bus
         elif _SMBUS_CLS is not None:
-            self._bus = _SMBUS_CLS(bus_number)
+            try:
+                self._bus = _SMBUS_CLS(bus_number)
+            except PermissionError as e:
+                self._bus = None
+                warnings.warn(
+                    "Permission denied when accessing I2C bus. Running in headless mode.",
+                    RuntimeWarning,
+                )
         else:
             self._bus = None
 
@@ -485,8 +501,16 @@ class LCDDisplay:
 
     def _run(self) -> None:
         while self._running:
-            self.update()
-            time.sleep(0.05)   # ~20 Hz tick rate
+            with self._lock:
+                should_update = any(
+                    zone._dirty or (zone.scrolling and len(zone.text) > zone.width)
+                    for zone in self._zones.values()
+                )
+
+            if should_update:
+                self.update()
+
+            time.sleep(self.update_frequency)
 
     # ------------------------------------------------------------------
     # Context manager support

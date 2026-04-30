@@ -42,7 +42,7 @@ from typing import Callable, List, Optional
 try:
     import RPi.GPIO as GPIO   # type: ignore[import]
     _HAS_GPIO = True
-except ImportError:
+except RuntimeError:
     GPIO = None               # type: ignore[assignment]
     _HAS_GPIO = False
 
@@ -57,11 +57,10 @@ class Button:
     pin : int
         BCM GPIO pin number.
     pull_up : bool, optional
-        When ``True`` (default) the internal pull-up resistor is enabled and
+        When ``False`` (default),  assumes active-high wiring with an
+        external pull-down resistor.  Set to ``True`` to enable the internal pull-up resistor and
         the button is considered pressed when the pin reads ``LOW``
-        (active-low wiring).  Set to ``False`` for active-high wiring with an
-        external pull-down resistor.
-    hold_time : float, optional
+        (active-low wiring).    hold_time : float, optional
         Seconds the button must be continuously pressed before the *held*
         state becomes active and the hold callback fires.  Defaults to ``1.0``.
     bounce_time : int, optional
@@ -72,7 +71,7 @@ class Button:
     def __init__(
         self,
         pin: int,
-        pull_up: bool = True,
+        pull_up: bool = False,
         hold_time: float = 1.0,
         bounce_time: int = 50,
     ) -> None:
