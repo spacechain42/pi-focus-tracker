@@ -31,7 +31,7 @@ def _make_timer(title="Focus", duration=300, **kwargs):
     pause_btn = _make_mock_button()
     end_btn   = _make_mock_button()
     timer = CountdownTimer(
-        title, duration, display, pause_btn, end_btn, **kwargs
+        display, "timer_time", duration, pause_btn, end_btn, **kwargs
     )
     return timer, display, pause_btn, end_btn
 
@@ -82,27 +82,12 @@ class TestCountdownTimerConstruction(unittest.TestCase):
     def test_zero_duration_raises(self):
         from pi_focus_tracker.timer import CountdownTimer
         with self.assertRaises(ValueError):
-            CountdownTimer("t", 0, _make_mock_display(), _make_mock_button(), _make_mock_button())
+            CountdownTimer(_make_mock_display(), "timer_time", 0, _make_mock_button(), _make_mock_button())
 
     def test_negative_duration_raises(self):
         from pi_focus_tracker.timer import CountdownTimer
         with self.assertRaises(ValueError):
-            CountdownTimer("t", -1, _make_mock_display(), _make_mock_button(), _make_mock_button())
-
-    def test_creates_title_zone_short_title(self):
-        from pi_focus_tracker.timer import _TITLE_WIDTH
-        timer, display, _, _ = _make_timer(title="Work", duration=60)
-        display.add_zone.assert_any_call(
-            "timer_title", row=1, col=0, width=_TITLE_WIDTH, text="Work", scrolling=False
-        )
-
-    def test_creates_title_zone_long_title_enables_scrolling(self):
-        from pi_focus_tracker.timer import _TITLE_WIDTH
-        long_title = "A Very Long Focus Session Title"
-        timer, display, _, _ = _make_timer(title=long_title, duration=60)
-        display.add_zone.assert_any_call(
-            "timer_title", row=1, col=0, width=_TITLE_WIDTH, text=long_title, scrolling=True
-        )
+            CountdownTimer(_make_mock_display(), "timer_time", -1, _make_mock_button(), _make_mock_button())
 
     def test_creates_time_zone_with_formatted_duration(self):
         from pi_focus_tracker.timer import _TIME_WIDTH
