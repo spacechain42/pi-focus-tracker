@@ -1,14 +1,14 @@
 """
 display.py
 ==========
-I²C interface for a 2×16 HD44780-compatible character LCD driven by a
-PCF8574 I²C I/O expander (the most common "I²C LCD backpack" variant).
+I2C interface for a 2x16 HD44780-compatible character LCD driven by a
+PCF8574 I2C I/O expander (the most common "I2C LCD backpack" variant).
 
 Classes
 -------
-- :class:`TextZone`   – A named rectangular region that holds static or
+- :class:`TextZone`   - A named rectangular region that holds static or
   automatically-scrolling text.
-- :class:`LCDDisplay` – Top-level controller that owns one SMBus handle and
+- :class:`LCDDisplay` - Top-level controller that owns one SMBus handle and
   a collection of :class:`TextZone` objects.
 
 Hardware notes
@@ -201,18 +201,18 @@ class TextZone:
 # ---------------------------------------------------------------------------
 
 class LCDDisplay:
-    """2×16 I²C character LCD controller.
+    """2x16 I2C character LCD controller.
 
     Manages a set of :class:`TextZone` objects and drives a HD44780-
-    compatible LCD module connected via a PCF8574 I²C I/O expander.
+    compatible LCD module connected via a PCF8574 I2C I/O expander.
 
     Parameters
     ----------
     i2c_address : int, optional
-        7-bit I²C address of the PCF8574 expander.  Common values are
+        7-bit I2C address of the PCF8574 expander.  Common values are
         ``0x27`` and ``0x3F``.  Defaults to ``0x27``.
     bus_number : int, optional
-        SMBus/I²C bus number (``1`` on most Raspberry Pi models).
+        SMBus/I2C bus number (``1`` on most Raspberry Pi models).
     cols : int, optional
         Number of columns on the display.  Defaults to 16.
     rows : int, optional
@@ -281,7 +281,7 @@ class LCDDisplay:
     # ------------------------------------------------------------------
 
     def _write_byte(self, data: int) -> None:
-        """Send one byte to the PCF8574 over I²C."""
+        """Send one byte to the PCF8574 over I2C."""
         if self._bus is None:
             return
         backlight_bit = _BACKLIGHT if self._backlight else 0
