@@ -10,6 +10,7 @@ def main():
     lcd = LCDDisplay()
     timer = CountdownTimer(30)
     lcd.add_zone("timer", row=0, col=0, width=6, text=str(timer.remaining_seconds()))
+    lcd.add_zone("label", row=1, col=0, width=16, text="Time Remaining")
 
     while True:
         lcd.display_time(timer.get_time_remaining())
