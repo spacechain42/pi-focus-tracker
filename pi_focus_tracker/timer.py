@@ -44,24 +44,19 @@ class TimerState(Enum):
 class CountdownTimer:
     """Interactive countdown timer with title and remaining-time display zones.
 
-    Parameters
-    ----------
-    title : str
-        Label shown on the first row.  Scrolls automatically when longer
-        than 16 characters.
-    duration_seconds : int
-        Total countdown duration.  Must be positive.
-    display : LCDDisplay
-        Pre-constructed display controller.  The zones ``timer_title`` (row 0)
-        and ``timer_time`` (row 1) are created on construction; ensure both
-        rows are free before instantiating.
-    pause_button : Button
-        Pauses the timer when it is running; resumes it when it is paused.
-    end_button : Button
-        Ends the session immediately, but *only* while the timer is paused.
-        Also dismisses the DONE screen after the countdown completes.
-    update_interval : float, optional
-        Seconds between polling cycles.  Defaults to ``0.1``.
+    Args:
+        title: Label shown on the first row. Scrolls automatically when longer
+            than 16 characters.
+        duration_seconds: Total countdown duration. Must be positive.
+        display: Pre-constructed display controller. The zones
+            ``timer_title`` (row 0) and ``timer_time`` (row 1) are created on
+            construction; ensure both rows are free before instantiating.
+        pause_button: Pauses the timer when it is running; resumes it when it
+            is paused.
+        end_button: Ends the session immediately, but *only* while the timer
+            is paused. Also dismisses the DONE screen after the countdown
+            completes.
+        update_interval: Seconds between polling cycles. Defaults to ``0.1``.
     """
 
     def __init__(

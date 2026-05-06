@@ -87,23 +87,16 @@ _ROW_OFFSETS = [0x00, 0x40, 0x14, 0x54]
 class TextZone:
     """A named rectangular region on the LCD display.
 
-    Parameters
-    ----------
-    name : str
-        Unique identifier for this zone.
-    row : int
-        Zero-based row index (0 or 1 for a 2-line display).
-    col : int
-        Zero-based starting column.
-    width : int
-        Number of characters wide.
-    text : str, optional
-        Initial text content.  Defaults to an empty string.
-    scrolling : bool, optional
-        If ``True`` the text scrolls horizontally when it is longer than
-        *width*.  Defaults to ``False``.
-    scroll_speed : float, optional
-        Seconds between each one-character scroll step.  Defaults to 0.3.
+    Args:
+        name: Unique identifier for this zone.
+        row: Zero-based row index (0 or 1 for a 2-line display).
+        col: Zero-based starting column.
+        width: Number of characters wide.
+        text: Initial text content. Defaults to an empty string.
+        scrolling: If ``True`` the text scrolls horizontally when it is
+            longer than *width*. Defaults to ``False``.
+        scroll_speed: Seconds between each one-character scroll step.
+            Defaults to 0.3.
     """
 
     def __init__(
@@ -174,9 +167,7 @@ class TextZone:
     def tick(self) -> bool:
         """Advance the scroll position if enough time has passed.
 
-        Returns
-        -------
-        bool
+        Returns:
             ``True`` when the display text changed and the zone needs
             to be redrawn.
         """
@@ -206,30 +197,22 @@ class LCDDisplay:
     Manages a set of :class:`TextZone` objects and drives a HD44780-
     compatible LCD module connected via a PCF8574 I2C I/O expander.
 
-    Parameters
-    ----------
-    i2c_address : int, optional
-        7-bit I2C address of the PCF8574 expander.  Common values are
-        ``0x27`` and ``0x3F``.  Defaults to ``0x27``.
-    bus_number : int, optional
-        SMBus/I2C bus number (``1`` on most Raspberry Pi models).
-    cols : int, optional
-        Number of columns on the display.  Defaults to 16.
-    rows : int, optional
-        Number of rows on the display.  Defaults to 2.
-    update_frequency : float, optional
-        Seconds between background auto-update loop iterations.
-        Defaults to ``0.5``.
-    auto_update : bool, optional
-        When ``True`` a background thread continuously refreshes scrolling
-        zones and rewrites changed zones to the LCD.  Defaults to ``True``.
+    Args:
+        i2c_address: 7-bit I2C address of the PCF8574 expander. Common
+            values are ``0x27`` and ``0x3F``. Defaults to ``0x27``.
+        bus_number: SMBus/I2C bus number (``1`` on most Raspberry Pi models).
+        cols: Number of columns on the display. Defaults to 16.
+        rows: Number of rows on the display. Defaults to 2.
+        update_frequency: Seconds between background auto-update loop
+            iterations. Defaults to ``0.5``.
+        auto_update: When ``True`` a background thread continuously refreshes
+            scrolling zones and rewrites changed zones to the LCD.
+            Defaults to ``True``.
 
-    Raises
-    ------
-    RuntimeError
-        If *i2c_bus* is ``None`` (no smbus library found) *and*
-        ``auto_update`` is ``True``.  Pass ``auto_update=False`` to use
-        the display without a real bus (e.g. in unit tests).
+    Raises:
+        RuntimeError: If *i2c_bus* is ``None`` (no smbus library found) and
+            ``auto_update`` is ``True``. Pass ``auto_update=False`` to use
+            the display without a real bus (e.g. in unit tests).
     """
 
     def __init__(
@@ -302,12 +285,9 @@ class LCDDisplay:
     def _send(self, value: int, mode: int = 0) -> None:
         """Send an 8-bit value as two 4-bit nibbles.
 
-        Parameters
-        ----------
-        value : int
-            The byte to send.
-        mode : int
-            ``0`` for command, ``_RS`` (= 1) for character data.
+        Args:
+            value: The byte to send.
+            mode: ``0`` for command, ``_RS`` (= 1) for character data.
         """
         high = mode | (value & 0xF0)
         low  = mode | ((value << 4) & 0xF0)
@@ -390,31 +370,21 @@ class LCDDisplay:
     ) -> "TextZone":
         """Create a new :class:`TextZone` and register it with the display.
 
-        Parameters
-        ----------
-        name : str
-            Unique identifier.  Used with :meth:`set_zone_text`.
-        row, col : int
-            Top-left position of the zone (zero-based).
-        width : int
-            Number of characters in the zone.
-        text : str, optional
-            Initial text.
-        scrolling : bool, optional
-            Enable horizontal scrolling for this zone.
-        scroll_speed : float, optional
-            Seconds between scroll steps.
+        Args:
+            name: Unique identifier. Used with :meth:`set_zone_text`.
+            row: Top-left row position of the zone (zero-based).
+            col: Top-left column position of the zone (zero-based).
+            width: Number of characters in the zone.
+            text: Initial text.
+            scrolling: Enable horizontal scrolling for this zone.
+            scroll_speed: Seconds between scroll steps.
 
-        Returns
-        -------
-        TextZone
+        Returns:
             The newly created zone.
 
-        Raises
-        ------
-        ValueError
-            If the zone falls outside the display bounds or overlaps an
-            existing zone.
+        Raises:
+            ValueError: If the zone falls outside the display bounds or
+                overlaps an existing zone.
         """
         with self._lock:
             if row < 0 or row >= self.rows:
@@ -442,17 +412,13 @@ class LCDDisplay:
     def set_zone_text(self, name: str, text: str) -> None:
         """Update the text content of a registered zone.
 
-        Parameters
-        ----------
-        name : str
-            Zone identifier (must have been added with :meth:`add_zone`).
-        text : str
-            New text.
+        Args:
+            name: Zone identifier (must have been added with
+                :meth:`add_zone`).
+            text: New text.
 
-        Raises
-        ------
-        KeyError
-            If *name* is not a known zone.
+        Raises:
+            KeyError: If *name* is not a known zone.
         """
         with self._lock:
             self._zones[name].set_text(text)

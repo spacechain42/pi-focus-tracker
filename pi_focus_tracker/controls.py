@@ -9,10 +9,10 @@ Overview
 :class:`Controls` accepts a mapping of *name → Button* and lets you register
 actions for:
 
-1. **Individual button press** – fires when a single button becomes pressed.
-2. **Button combination press** – fires when every button in a named set is
+1. **Individual button press** - fires when a single button becomes pressed.
+2. **Button combination press** - fires when every button in a named set is
    pressed at the same time.
-3. **Press-and-hold** – fires once per hold cycle when a button (or every
+3. **Press-and-hold** - fires once per hold cycle when a button (or every
    button in a set) has been held for its configured *hold_time*.
 
 Actions can be:
@@ -58,12 +58,11 @@ class Controls:
     """Polls a set of :class:`~pi_focus_tracker.button.Button` objects and
     dispatches registered press, combination, and hold actions.
 
-    Parameters
-    ----------
-    buttons : dict[str, Button]
-        Mapping of *name* → :class:`~pi_focus_tracker.button.Button`.
-    poll_interval : float, optional
-        Seconds between each polling cycle.  Defaults to ``0.02`` (50 Hz).
+    Args:
+        buttons: Mapping of *name* →
+            :class:`~pi_focus_tracker.button.Button`.
+        poll_interval: Seconds between each polling cycle.
+            Defaults to ``0.02`` (50 Hz).
     """
 
     def __init__(
@@ -98,23 +97,18 @@ class Controls:
     ) -> None:
         """Register an action that fires when *buttons* are all pressed.
 
-        Parameters
-        ----------
-        buttons : str or list of str
-            A single button name or a list of button names.  When all
-            named buttons are simultaneously pressed (i.e. every button's
-            :attr:`~pi_focus_tracker.button.Button.just_pressed` or
-            :attr:`~pi_focus_tracker.button.Button.pressed` state is active
-            at the same poll cycle) the action is executed.
-        action : callable or str
-            Python callable (called with no arguments) or a shell command
-            string.
+        Args:
+            buttons: A single button name or a list of button names. When all
+                named buttons are simultaneously pressed (i.e. every button's
+                :attr:`~pi_focus_tracker.button.Button.just_pressed` or
+                :attr:`~pi_focus_tracker.button.Button.pressed` state is
+                active at the same poll cycle) the action is executed.
+            action: Python callable (called with no arguments) or a shell
+                command string.
 
-        Raises
-        ------
-        KeyError
-            If any button name is not in the *buttons* dict passed at
-            construction time.
+        Raises:
+            KeyError: If any button name is not in the *buttons* dict passed
+                at construction time.
         """
         key = self._make_key(buttons)
         self._press_actions.setdefault(key, []).append(action)
@@ -131,12 +125,9 @@ class Controls:
         will not fire again until at least one of the buttons is released and
         re-pressed.
 
-        Parameters
-        ----------
-        buttons : str or list of str
-            Single button name or list of button names.
-        action : callable or str
-            Python callable or shell command string.
+        Args:
+            buttons: Single button name or list of button names.
+            action: Python callable or shell command string.
         """
         key = self._make_key(buttons)
         self._hold_actions.setdefault(key, []).append(action)
@@ -189,12 +180,10 @@ class Controls:
     def run(self, stop_event: Optional[threading.Event] = None) -> None:
         """Block the calling thread, polling buttons until stopped.
 
-        Parameters
-        ----------
-        stop_event : threading.Event, optional
-            When provided, the loop exits once the event is set.  If omitted
-            the loop runs until :meth:`stop` is called or a
-            :exc:`KeyboardInterrupt` is raised.
+        Args:
+            stop_event: When provided, the loop exits once the event is set.
+                If omitted the loop runs until :meth:`stop` is called or a
+                :exc:`KeyboardInterrupt` is raised.
         """
         self._running = True
         try:

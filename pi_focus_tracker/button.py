@@ -5,12 +5,12 @@ GPIO push-button interface for Raspberry Pi.
 
 Each :class:`Button` monitors a single GPIO pin and tracks:
 
-- **pressed** – whether the button is currently held down,
-- **just_pressed** – whether the button transitioned from released → pressed
+- **pressed** - whether the button is currently held down,
+- **just_pressed** - whether the button transitioned from released → pressed
   since the last :meth:`~Button.update` call,
-- **just_released** – whether the button transitioned from pressed → released
+- **just_released** - whether the button transitioned from pressed → released
   since the last :meth:`~Button.update` call,
-- **held** – whether the button has been continuously pressed for at least
+- **held** - whether the button has been continuously pressed for at least
   *hold_time* seconds.
 
 Callbacks
@@ -52,20 +52,17 @@ _UNSET = object()   # sentinel for "no GPIO value injected"
 class Button:
     """Tracks the state of a single GPIO push-button.
 
-    Parameters
-    ----------
-    pin : int
-        BCM GPIO pin number.
-    pull_up : bool, optional
-        When ``False`` (default),  assumes active-high wiring with an
-        external pull-down resistor.  Set to ``True`` to enable the internal pull-up resistor and
-        the button is considered pressed when the pin reads ``LOW``
-        (active-low wiring).    hold_time : float, optional
-        Seconds the button must be continuously pressed before the *held*
-        state becomes active and the hold callback fires.  Defaults to ``1.0``.
-    bounce_time : int, optional
-        Debounce time in milliseconds passed to ``RPi.GPIO.setup``.
-        Defaults to ``50``.
+    Args:
+        pin: BCM GPIO pin number.
+        pull_up: When ``False`` (default), assumes active-high wiring with an
+            external pull-down resistor. Set to ``True`` to enable the internal
+            pull-up resistor; in this mode the button is considered pressed
+            when the pin reads ``LOW`` (active-low wiring).
+        hold_time: Seconds the button must be continuously pressed before the
+            *held* state becomes active and the hold callback fires.
+            Defaults to ``1.0``.
+        bounce_time: Debounce time in milliseconds passed to
+            ``RPi.GPIO.setup``. Defaults to ``50``.
     """
 
     def __init__(
@@ -159,8 +156,9 @@ class Button:
     def _read_pin(self) -> bool:
         """Read the current physical state of the GPIO pin.
 
-        Returns ``True`` when the button is *pressed*, accounting for
-        active-low vs active-high wiring.
+        Returns:
+            ``True`` when the button is *pressed*, accounting for active-low
+            vs active-high wiring.
         """
         if not _HAS_GPIO:
             return False   # headless / no hardware
@@ -174,11 +172,10 @@ class Button:
 
         Fires registered callbacks for press, release, and hold events.
 
-        Parameters
-        ----------
-        _inject_state : bool, optional
-            *Testing only.*  Pass a boolean to override the GPIO read so
-            tests can exercise state transitions without real hardware.
+        Args:
+            _inject_state: *Testing only.* Pass a boolean to override the GPIO
+                read so tests can exercise state transitions without real
+                hardware.
         """
         with self._lock:
             if _inject_state is _UNSET:
