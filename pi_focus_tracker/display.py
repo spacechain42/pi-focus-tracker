@@ -387,12 +387,17 @@ class LCDDisplay:
                 overlaps an existing zone.
         """
         with self._lock:
+            # Parameter validation and overlap checks
+            if name in self._zones:
+                raise ValueError(f"zone with name '{name}' already exists")
+
             if row < 0 or row >= self.rows:
                 raise ValueError("row must be within the display bounds")
-            if col < 0 or col + width > self.cols:
-                raise ValueError("zone must fit within the display width")
 
             zone_end = col + width
+            if col < 0 or zone_end > self.cols:
+                raise ValueError("zone must fit within the display width")
+
             for existing_zone in self._zones.values():
                 if existing_zone.row != row:
                     continue
@@ -400,6 +405,7 @@ class LCDDisplay:
                 if col < existing_end and existing_zone.col < zone_end:
                     raise ValueError("zone must not overlap an existing zone")
 
+            # Zone creation
             zone = TextZone(name, row, col, width, text, scrolling, scroll_speed)
             self._zones[name] = zone
         return zone
