@@ -1,9 +1,9 @@
 """
 timer.py
 ========
-Interactive countdown timer that drives two TextZone objects on an LCDDisplay
+Interactive countdown timer that drives a single TextZone object on an LCDDisplay
 and responds to two push-buttons.
-
+    
 State machine
 -------------
 
@@ -12,12 +12,6 @@ State machine
     PAUSED    -- end_button press   --> ENDED
     RUNNING   -- remaining == 0     --> COMPLETED
     COMPLETED -- any button press   --> ENDED
-
-Display layout (2x16)
----------------------
-- Row 0 ``timer_time``  -- remaining time as ``MM:SS``; ``MM:SS [P]`` when
-  paused; ``DONE`` when completed.
-- Row 1 ``timer_title`` -- session title (scrolling when longer than 6 chars).
 """
 
 import threading
@@ -28,10 +22,7 @@ from typing import Optional
 from .button import Button
 from .display import LCDDisplay
 
-_TITLE_ZONE = "timer_title"
-_TIME_ZONE  = "timer_time"
-_TIME_WIDTH = 9   # "MM:SS"
-_TITLE_WIDTH = 6
+_TIME_WIDTH = 9   # "MM:SS [p]"
 
 
 class TimerState(Enum):
@@ -42,15 +33,14 @@ class TimerState(Enum):
 
 
 class CountdownTimer:
-    """Interactive countdown timer with title and remaining-time display zones.
+    """Interactive countdown timer with a single display zone.
 
     Args:
-        title: Label shown on the first row. Scrolls automatically when longer
-            than 16 characters.
+        display: Pre-constructed display controller. The zone specified by
+            ``zone_name`` is created on construction; ensure the row is free
+            before instantiating.
+        zone_name: Name of the display zone for the timer.
         duration_seconds: Total countdown duration. Must be positive.
-        display: Pre-constructed display controller. The zones
-            ``timer_title`` (row 0) and ``timer_time`` (row 1) are created on
-            construction; ensure both rows are free before instantiating.
         pause_button: Pauses the timer when it is running; resumes it when it
             is paused.
         end_button: Ends the session immediately, but *only* while the timer
@@ -61,9 +51,9 @@ class CountdownTimer:
 
     def __init__(
         self,
-        title: str,
-        duration_seconds: int,
         display: LCDDisplay,
+        zone_name: str,
+        duration_seconds: int,
         pause_button: Button,
         end_button: Button,
         update_interval: float = 0.1,
@@ -71,9 +61,9 @@ class CountdownTimer:
         if duration_seconds <= 0:
             raise ValueError("duration_seconds must be positive")
 
-        self._title           = title
         self._duration        = duration_seconds
         self._display         = display
+        self._zone_name       = zone_name
         self._pause_btn       = pause_button
         self._end_btn         = end_button
         self._update_interval = update_interval
@@ -91,13 +81,7 @@ class CountdownTimer:
 
         # Register display zones
         display.add_zone(
-            _TITLE_ZONE,
-            row=1, col=0, width=_TITLE_WIDTH,
-            text=title,
-            scrolling=len(title) > _TITLE_WIDTH,
-        )
-        display.add_zone(
-            _TIME_ZONE,
+            self._zone_name,
             row=0, col=0, width=_TIME_WIDTH,
             text=self._format_time(duration_seconds),
         )
@@ -124,7 +108,7 @@ class CountdownTimer:
         self._pause_start     = None
         with self._state_lock:
             self._state = TimerState.RUNNING
-        self._display.set_zone_text(_TIME_ZONE, self._format_time(self._duration))
+        self._display.set_zone_text(self._zone_name, self._format_time(self._duration))
         self._stop_event.clear()
 
         try:
@@ -170,10 +154,10 @@ class CountdownTimer:
                 remaining = self._remaining_float()
                 if remaining <= 0:
                     self._state = TimerState.COMPLETED
-                    self._display.set_zone_text(_TIME_ZONE, "DONE")
+                    self._display.set_zone_text(self._zone_name, "DONE")
                 else:
                     self._display.set_zone_text(
-                        _TIME_ZONE, self._format_time(int(remaining))
+                        self._zone_name, self._format_time(int(remaining))
                     )
             # PAUSED:    display was set by _do_pause / _do_resume; no update.
             # COMPLETED: display already shows DONE; loop waits for button press.
@@ -202,7 +186,7 @@ class CountdownTimer:
         self._pause_start = time.monotonic()
         self._state = TimerState.PAUSED
         secs = max(0, int(self._remaining_float()))
-        self._display.set_zone_text(_TIME_ZONE, f"{self._format_time(secs)} [P]")
+        self._display.set_zone_text(self._zone_name, f"{self._format_time(secs)} [P]")
 
     def _do_resume(self) -> None:
         if self._pause_start is not None:
@@ -210,7 +194,7 @@ class CountdownTimer:
             self._pause_start = None
         self._state = TimerState.RUNNING
         secs = max(0, int(self._remaining_float()))
-        self._display.set_zone_text(_TIME_ZONE, self._format_time(secs))
+        self._display.set_zone_text(self._zone_name, self._format_time(secs))
 
     # ------------------------------------------------------------------
     # Timing
